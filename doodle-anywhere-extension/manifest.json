@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Doodle Anywhere",
+  "version": "1.0.1",
+  "description": "Draw and doodle on any webpage with advanced drawing tools, multiple colors, and brush sizes",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Doodle Anywhere - Click to start drawing"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
