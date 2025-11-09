@@ -1,7 +1,4 @@
 # DoodleAnywhere_ChromeExtension
-Doodle Anywhere is a lightweight Chrome Extension that lets you draw and annotate directly on any webpage. It provides an intuitive canvas overlay with customizable brush colors, sizes, undo/redo controls, and a compact floating toolbar.
-_______________________________
-# Doodle Anywhere – Chrome Extension
 
 Doodle Anywhere is a lightweight Chrome Extension that lets you draw and annotate directly on any webpage.  
 It adds a floating doodle toolbar with brush controls, undo/redo, and clear options — making it easy to mark up webpages on the fly.  
