@@ -7,62 +7,66 @@ let isDoodleActive = false;
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   try {
     switch (request.action) {
-      case 'START_DOODLE':
+      case "START_DOODLE":
         if (!isDoodleActive) {
           initializeDoodle();
-          sendResponse({success: true});
+          sendResponse({ success: true });
         } else {
-          sendResponse({success: false, message: 'Doodle already active'});
+          sendResponse({ success: false, message: "Doodle already active" });
         }
         break;
-        
-      case 'STOP_DOODLE':
+
+      case "STOP_DOODLE":
         if (isDoodleActive) {
           closeDoodle();
-          sendResponse({success: true});
+          sendResponse({ success: true });
         } else {
-          sendResponse({success: false, message: 'Doodle not active'});
+          sendResponse({ success: false, message: "Doodle not active" });
         }
         break;
-        
-      case 'CHECK_STATUS':
-        sendResponse({isActive: isDoodleActive});
+
+      case "CHECK_STATUS":
+        sendResponse({ isActive: isDoodleActive });
         break;
-        
+
       default:
-        sendResponse({success: false, message: 'Unknown action'});
+        sendResponse({ success: false, message: "Unknown action" });
     }
   } catch (error) {
-    console.error('Doodle extension error:', error);
-    sendResponse({success: false, message: error.message});
+    console.error("Doodle extension error:", error);
+    sendResponse({ success: false, message: error.message });
   }
-  
+
   return true; // Keep the message channel open for async response
 });
 
 function initializeDoodle() {
-  if (document.getElementById('doodleCanvas')) return;
+  if (document.getElementById("doodleCanvas")) return;
 
-  const canvas = document.createElement('canvas');
-  canvas.id = 'doodleCanvas';
-  canvas.style.position = 'absolute';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
-  canvas.style.width = '100%';
-  canvas.style.height = Math.max(document.documentElement.scrollHeight, window.innerHeight) + 'px';
-  canvas.style.zIndex = '999999';
-  canvas.style.pointerEvents = 'auto';
-  canvas.style.cursor = 'crosshair';
+  const canvas = document.createElement("canvas");
+  canvas.id = "doodleCanvas";
+  canvas.style.position = "absolute";
+  canvas.style.top = "0";
+  canvas.style.left = "0";
+  canvas.style.width = "100%";
+  canvas.style.height =
+    Math.max(document.documentElement.scrollHeight, window.innerHeight) + "px";
+  canvas.style.zIndex = "999999";
+  canvas.style.pointerEvents = "auto";
+  canvas.style.cursor = "crosshair";
   canvas.width = window.innerWidth;
-  canvas.height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+  canvas.height = Math.max(
+    document.documentElement.scrollHeight,
+    window.innerHeight
+  );
   document.body.appendChild(canvas);
 
-  const ctx = canvas.getContext('2d');
-  let currentColor = '#ff0000';
+  const ctx = canvas.getContext("2d");
+  let currentColor = "#ff0000";
   let currentSize = 3;
   ctx.strokeStyle = currentColor;
   ctx.lineWidth = currentSize;
-  ctx.lineCap = 'round';
+  ctx.lineCap = "round";
 
   let drawing = false;
   let drawingEnabled = true;
@@ -77,7 +81,7 @@ function initializeDoodle() {
 
   function redrawAll() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.lineCap = 'round';
+    ctx.lineCap = "round";
     for (const stroke of strokes) {
       ctx.strokeStyle = stroke.color;
       ctx.lineWidth = stroke.size;
@@ -107,7 +111,10 @@ function initializeDoodle() {
     ctx.beginPath();
     const len = currentStroke.points.length;
     if (len > 1) {
-      ctx.moveTo(currentStroke.points[len - 2].x, currentStroke.points[len - 2].y);
+      ctx.moveTo(
+        currentStroke.points[len - 2].x,
+        currentStroke.points[len - 2].y
+      );
       ctx.lineTo(point.x, point.y);
       ctx.stroke();
     }
@@ -122,14 +129,14 @@ function initializeDoodle() {
     currentStroke = {};
   };
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mouseup", stopDraw);
+  canvas.addEventListener("mouseleave", stopDraw);
 
   // 🔧 Compact Control Panel
-  const controlPanel = document.createElement('div');
-  controlPanel.id = 'doodleControlPanel';
+  const controlPanel = document.createElement("div");
+  controlPanel.id = "doodleControlPanel";
   controlPanel.style.cssText = `
     position: fixed;
     top: 10px;
@@ -148,79 +155,213 @@ function initializeDoodle() {
   `;
   document.body.appendChild(controlPanel);
 
-  const title = document.createElement('div');
-  title.textContent = '🎨 Doodle';
-  title.style.cssText = 'font-size: 13px; font-weight: bold; margin-bottom: 6px; text-align: center;';
+  const title = document.createElement("div");
+  title.textContent = "🎨 Doodle";
+  title.style.cssText =
+    "font-size: 13px; font-weight: bold; margin-bottom: 6px; text-align: center;";
   controlPanel.appendChild(title);
 
   // Colors
-  const colorContainer = document.createElement('div');
-  colorContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;';
-  ['#ff0000','#00ff00','#0000ff','#000000','#ffffff'].forEach(color => {
-    const btn = document.createElement('button');
+  const colorContainer = document.createElement("div");
+  colorContainer.style.cssText =
+    "display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;";
+  ["#ff0000", "#00ff00", "#0000ff", "#000000", "#ffffff"].forEach((color) => {
+    const btn = document.createElement("button");
     btn.style.cssText = `
       width: 16px; height: 16px;
-      border: 2px solid ${color===currentColor?'#fff':'rgba(255,255,255,0.3)'};
+      border: 2px solid ${
+        color === currentColor ? "#fff" : "rgba(255,255,255,0.3)"
+      };
       border-radius: 50%;
       background:${color}; cursor:pointer;
     `;
     btn.onclick = () => {
       currentColor = color;
       ctx.strokeStyle = currentColor;
-      colorContainer.querySelectorAll('button').forEach(b => b.style.border='2px solid rgba(255,255,255,0.3)');
-      btn.style.border='2px solid #fff';
+      colorContainer
+        .querySelectorAll("button")
+        .forEach(
+          (b) => (b.style.border = "2px solid rgba(255,255,255,0.3)")
+        );
+      btn.style.border = "2px solid #fff";
     };
     colorContainer.appendChild(btn);
   });
   controlPanel.appendChild(colorContainer);
 
   // Brush size
-  const sizeSlider = document.createElement('input');
-  sizeSlider.type='range'; sizeSlider.min='1'; sizeSlider.max='20'; sizeSlider.value=currentSize;
-  sizeSlider.style.cssText='width:100%;';
-  sizeSlider.oninput = e => { currentSize=parseInt(e.target.value); ctx.lineWidth=currentSize; };
+  const sizeSlider = document.createElement("input");
+  sizeSlider.type = "range";
+  sizeSlider.min = "1";
+  sizeSlider.max = "20";
+  sizeSlider.value = currentSize;
+  sizeSlider.style.cssText = "width:100%;";
+  sizeSlider.oninput = (e) => {
+    currentSize = parseInt(e.target.value, 10);
+    ctx.lineWidth = currentSize;
+  };
   controlPanel.appendChild(sizeSlider);
 
   // Button helper
-  function createButton(label,onClick){
-    const btn=document.createElement('button');
-    btn.textContent=label;
-    btn.style.cssText=`
+  function createButton(label, onClick) {
+    const btn = document.createElement("button");
+    btn.textContent = label;
+    btn.style.cssText = `
       padding:4px 6px; margin-top:4px;
       font-size:11px; border:none; border-radius:4px;
       background:#444; color:#fff; cursor:pointer; width:100%;
     `;
-    btn.onclick=onClick;
+    btn.onclick = onClick;
     return btn;
   }
 
-  controlPanel.appendChild(createButton('↶ Undo',()=>{if(strokes.length){undone.push(strokes.pop());redrawAll();}}));
-  controlPanel.appendChild(createButton('↷ Redo',()=>{if(undone.length){strokes.push(undone.pop());redrawAll();}}));
-  controlPanel.appendChild(createButton('🗑️ Clear',()=>{if(confirm('Clear all doodles?')){strokes=[];undone=[];ctx.clearRect(0,0,canvas.width,canvas.height);}}));
-  controlPanel.appendChild(createButton('❌ Close',closeDoodle));
+  // Undo / Redo functions so we can reuse them for shortcuts
+  function undoStroke() {
+    if (strokes.length) {
+      undone.push(strokes.pop());
+      redrawAll();
+    }
+  }
 
-  // Handlers
-  const keyHandler = e => {
-    if(e.ctrlKey && e.key==='z'){ if(strokes.length){undone.push(strokes.pop());redrawAll();} e.preventDefault();}
-    if(e.ctrlKey && e.key==='y'){ if(undone.length){strokes.push(undone.pop());redrawAll();} e.preventDefault();}
-  };
+  function redoStroke() {
+    if (undone.length) {
+      strokes.push(undone.pop());
+      redrawAll();
+    }
+  }
+
+  controlPanel.appendChild(createButton("↶ Undo", undoStroke));
+  controlPanel.appendChild(createButton("↷ Redo", redoStroke));
+
+  controlPanel.appendChild(
+    createButton("🗑️ Clear", () => {
+      if (confirm("Clear all doodles?")) {
+        strokes = [];
+        undone = [];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    })
+  );
+
+  // ⬇ Export button
+  controlPanel.appendChild(
+    createButton("⬇ Export", () => {
+      exportCanvasAsPNG(canvas);
+    })
+  );
+
+  controlPanel.appendChild(createButton("❌ Close", closeDoodle));
+
+  // Resize handler
   const resizeHandler = () => {
     canvas.width = window.innerWidth;
-    canvas.height = Math.max(document.documentElement.scrollHeight, window.innerHeight);
+    canvas.height = Math.max(
+      document.documentElement.scrollHeight,
+      window.innerHeight
+    );
     redrawAll();
   };
-  window.addEventListener('keydown', keyHandler);
-  window.addEventListener('resize', resizeHandler);
+  window.addEventListener("resize", resizeHandler);
 
-  doodleInstance = { canvas, controlPanel, keyHandler, resizeHandler };
+  doodleInstance = {
+    canvas,
+    controlPanel,
+    resizeHandler,
+    undo: undoStroke,
+    redo: redoStroke,
+  };
   isDoodleActive = true;
+}
+
+// Export current doodle canvas as PNG
+function exportCanvasAsPNG(canvas) {
+  if (!canvas) return;
+
+  try {
+    const dataUrl = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+
+    const host = window.location.hostname || "page";
+    const safeHost = host.replace(/\./g, "-");
+    const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    a.href = dataUrl;
+    a.download = `doodle-${safeHost}-${date}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    console.error("Failed to export doodle as PNG:", err);
+    alert("Sorry, could not export the doodle.");
+  }
 }
 
 function closeDoodle() {
   if (!isDoodleActive || !doodleInstance) return;
   if (doodleInstance.canvas) doodleInstance.canvas.remove();
   if (doodleInstance.controlPanel) doodleInstance.controlPanel.remove();
-  window.removeEventListener('keydown', doodleInstance.keyHandler);
-  window.removeEventListener('resize', doodleInstance.resizeHandler);
-  doodleInstance=null; isDoodleActive=false;
+  if (doodleInstance.resizeHandler) {
+    window.removeEventListener("resize", doodleInstance.resizeHandler);
+  }
+  doodleInstance = null;
+  isDoodleActive = false;
 }
+
+// 🔥 Global keyboard shortcuts
+// - Ctrl+Shift+D → toggle doodle mode
+// - Ctrl+Z       → undo (when doodle active)
+// - Ctrl+Shift+Z / Ctrl+Y → redo (when doodle active)
+// - Esc          → exit doodle mode
+window.addEventListener("keydown", (event) => {
+  // Don't interfere with typing in inputs/textareas/contentEditable
+  const active = document.activeElement;
+  if (
+    active &&
+    (active.tagName === "INPUT" ||
+      active.tagName === "TEXTAREA" ||
+      active.isContentEditable)
+  ) {
+    return;
+  }
+
+  const key = event.key.toLowerCase();
+
+  // Ctrl+Shift+D → toggle doodle mode
+  if (event.ctrlKey && event.shiftKey && key === "d") {
+    event.preventDefault();
+    if (isDoodleActive) {
+      closeDoodle();
+    } else {
+      initializeDoodle();
+    }
+    return;
+  }
+
+  // The rest only make sense if doodle is active
+  if (!isDoodleActive || !doodleInstance) return;
+
+  // Ctrl+Z → Undo
+  if (event.ctrlKey && !event.shiftKey && key === "z") {
+    event.preventDefault();
+    if (typeof doodleInstance.undo === "function") {
+      doodleInstance.undo();
+    }
+    return;
+  }
+
+  // Ctrl+Shift+Z OR Ctrl+Y → Redo
+  if (event.ctrlKey && (key === "y" || (event.shiftKey && key === "z"))) {
+    event.preventDefault();
+    if (typeof doodleInstance.redo === "function") {
+      doodleInstance.redo();
+    }
+    return;
+  }
+
+  // Esc → Exit doodle mode
+  if (!event.ctrlKey && !event.altKey && !event.metaKey && key === "escape") {
+    event.preventDefault();
+    closeDoodle();
+  }
+});
+
